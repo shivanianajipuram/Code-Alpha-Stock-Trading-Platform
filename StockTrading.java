@@ -22,7 +22,7 @@ class stocks{
 class MyDetails{
     String name;
     double Amount;
-    stocks s;
+    //stocks s;
     String buyingStockSymbol;
     public MyDetails(String name,double Amount,String buyingStockSymbol) {
        this.Amount=Amount;
@@ -35,29 +35,12 @@ class MyDetails{
     public String getName() {
         return name;
     }
-    public stocks getS() {
-        return s;
-    }
     public String getBuyingStockSymbol() {
         return buyingStockSymbol;
     }
 }
-class buyingStocks{
-    stocks s;
-    MyDetails details;
-    
-}
-class sellingStocks{
-    stocks s;
-    String sellingStockSymbol;
-    public sellingStocks(String sellingStockSymbol){
-        this.sellingStockSymbol=sellingStockSymbol;
-    }
-
-}
 class StockManager{
     ArrayList<stocks> stocksArrayList=new ArrayList<>();
-    ArrayList<MyDetails> DetailsArrayList=new ArrayList<>();
 
     stocks s1=new stocks("ANDROID","AND" ,9000.0);
     stocks s2=new stocks("APPLE","IOS" ,10000.0);
@@ -76,27 +59,71 @@ class StockManager{
         }
     }
 
-    void InitializeDetails(String name,double Amount,String buyingStockSymbol){
-        MyDetails d1=new MyDetails(name, Amount,buyingStockSymbol);
-        DetailsArrayList.add(d1);
+    stocks findStock(String buyingStockSymbol){
+        for(stocks s:stocksArrayList){
+            if(s.getStocksymbol().equals(buyingStockSymbol)){
+                return s;
+            }
+        }
+        return null;
     }
-    void displaydetails(){
-        for(MyDetails d:DetailsArrayList){
-            System.out.println(" " +d.getName()+" "+(d.getAmount())+" "+d.getBuyingStockSymbol());
+}
+class buyingStocks{
+    StockManager sManager;
+    ArrayList<MyDetails> DetailsArrayList=new ArrayList<>();
+    public buyingStocks(StockManager sManager) {
+     this.sManager=sManager;
+    }
+    void buyStock(String name,double Amount,String buyingStockSymbol){
+        stocks st=sManager.findStock(buyingStockSymbol);
+        if(st!=null && Amount>=st.getPrice()){
+            MyDetails details=new MyDetails(name,Amount,buyingStockSymbol);
+            DetailsArrayList.add(details);
+            System.out.println("Stock buyed");
+        }
+        else{
+            System.out.println("Stock not found");
         }
     }
+    void displaydetails(){
+        
+        for(MyDetails d:DetailsArrayList){
+            stocks buyingStockPrice= sManager.findStock(d.buyingStockSymbol);
+            System.out.println(" "+d.getName()+" "+(d.getAmount()-buyingStockPrice.getPrice())+" "+d.getBuyingStockSymbol());
+        }
+    }
+    
+}
+class sellingStocks{
+    StockManager sManager;
+
+    public sellingStocks(StockManager sManager) {
+        this.sManager = sManager;
+    }
+    void sellStocks(String sellingStockSymbol){
+        stocks st=sManager.findStock(sellingStockSymbol);
+        if(st!=null){
+            System.out.println("Sucessfully sold");
+        }
+        else{
+            System.out.println("Stock not found");
+        }
+    }
+
 }
 class StockTrading{
     public static void main(String[] args) {
         StockManager st=new StockManager();
         st.InitializeStocks();
+        buyingStocks buy = new buyingStocks(st);
+        sellingStocks sell=new sellingStocks(st);
         Scanner sc=new Scanner(System.in);
         
         while (true) { 
         System.out.println("1.For Stocks");
         System.out.println("2.Buy Stocks");
-        //System.out.println("3:Sell Stocks");
-        //System.out.println("4.Exit");
+        System.out.println("3:Sell Stocks");
+        System.out.println("4.Exit");
         int choice=sc.nextInt();
         switch(choice){
             case 1:
@@ -106,12 +133,20 @@ class StockTrading{
             System.out.println("Enter name of buyer:");
             String name=sc.next();
             System.out.println("Enter the amount in your account:");
-            double Amount=sc.nextInt();
+            double Amount=sc.nextDouble();
             System.out.println("Enter symbol of stock you want to buy");
             String buyingStockSymbol=sc.next();
-            st.InitializeDetails(name, Amount,buyingStockSymbol);
-            st.displaydetails();
+            buy.buyStock(name,Amount,buyingStockSymbol);
+            buy.displaydetails();
             break;
+            case 3:
+            System.out.println("Enter symbol of stock you want to sell: ");
+            String sellingStockSymbol=sc.next();
+            sell.sellStocks(sellingStockSymbol);
+            break;
+            case 4:
+            sc.close();
+            System.exit(0);
             default:
             sc.close();
         }
